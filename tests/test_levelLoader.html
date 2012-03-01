@@ -23,7 +23,7 @@ require([
   '../lib/entity',
   '../tests/entityLoader'
 ], function(Entity, entityLoader){
-  var levelPath = '../tests/resources/level.json';
+  var levelPath = '../tests/resources/level';
   require(['level!' + levelPath], function (levelData) {
     console.log("entities length = " + levelData.entities.length);
   });
