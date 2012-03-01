@@ -19,30 +19,19 @@
   </script>
   <script src="../lib/curl/src/curl.js"></script>
   <script>
-    var now = +new Date;
-    
-    
-    require([
-      'dollar',
-      'domReady!'
-    ], function($){
-      var levelPath = '../tests/resources/level.json';
-      console.log("Lets load a level: ", levelPath);
-      require(['level!'+levelPath], function(level){
-        console.log("got level: ", level);
-        level.enter();
-        level.update();
-        level.exit();
-      });
-    }); 
-    
+require([
+  '../lib/entity',
+  '../tests/entityLoader'
+], function(Entity, entityLoader){
+  var levelPath = '../tests/resources/level.json';
+  require(['level!' + levelPath], function (levelData) {
+    console.log("entities length = " + levelData.entities.length);
+  });
+});
   </script>
 </head>
 
 <body>
-
   <h1>Level Loader</h1>
-  <p>(See console for output)</p>
-
 </body>
 </html>
