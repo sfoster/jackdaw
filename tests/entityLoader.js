@@ -45,16 +45,9 @@ define(['../lib/entity'], function (Entity) {
     );
   }
 
-  // TODO: make this simpler by changing the Entity constructor to receive
-  // a single object as its argument (so we can create it straight from
-  // the loaded data and dont have to remove the components from the
-  // entity data)
   function createEntityFromData(entityData) {
-    var components = entityData.components;
-    delete entityData.components;
-    // an entity requires an array of components as the first argument
-    // and an object with any other properties of the entity as the second argument
-    return new Entity(components, entityData);
+    // just a pass through at this point. 
+    return new Entity(entityData);
   }
 
   function createEntities(levelData) {

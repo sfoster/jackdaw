@@ -57,12 +57,12 @@ define(['entity', 'component'], function(Entity, Component){
     });
 
     it("should accept a list of components", function() {
-      var ent = new Entity('c1, c2');
+      var ent = new Entity({ components: ['c1', 'c2'] });
       expect(ent.components.length).toBe(2);
     });
 
     it("should throw on bogus or unregistered components", function() {
-      var ent = new Entity('c1, c2');
+      var ent = new Entity({ components: ['c1', 'c2'] });
       expect(function () { ent.init(); }).toThrow();
     });
 
@@ -105,8 +105,8 @@ define(['entity', 'component'], function(Entity, Component){
           ent.someProperty = 0;
         }
       });
-      var ent1 = new Entity('attachDetach').init();
-      var ent2 = new Entity('attachDetach').init();
+      var ent1 = new Entity({ components: ['attachDetach'] }).init();
+      var ent2 = new Entity({ components: ['attachDetach'] }).init();
       
       expect(ent1.someProperty).toBe(10);
       expect(ent2.someProperty).toBe(10);

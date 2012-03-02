@@ -48,8 +48,8 @@ define(['entity', 'component', 'sprite'], function(Entity, Component, Sprite){
           ent.someProperty = 0;
         }
       });
-      var ent1 = new Entity('attachDetach').init();
-      var ent2 = new Entity('attachDetach').init();
+      var ent1 = new Entity({ components: ['attachDetach'] }).init();
+      var ent2 = new Entity({ components: ['attachDetach'] }).init();
 
       expect(ent1.someProperty).toBe(10);
       expect(ent2.someProperty).toBe(10);

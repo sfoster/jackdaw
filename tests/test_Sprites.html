@@ -41,7 +41,7 @@
         state: {
           walkup: lang.mixin(Object.create(commonState), {
             name: 'walkup', 
-            offsety: 180, // the offset from the top of the sprite sheet for this sequence
+            offsety: 180 // the offset from the top of the sprite sheet for this sequence
                           // animation frames are drawn horizontally, left to right
           }),
           walkright: lang.mixin(Object.create(commonState), {
@@ -59,7 +59,8 @@
         }
       });
       // make a new Entity with the playerSprite component we defined
-      var ent = window.player = new Entity("playerSprite", {
+      var ent = window.player = new Entity({
+        components: ["playerSprite"], 
         spriteState: 'standing',    // the initial state. Maybe sprite-state and other states can be combined?
         name: 'player',             // the name of this entity
         x: 10, y: 50, width: 32, height: 36,    // initial position/dimensions
