@@ -38,7 +38,8 @@
           }
         }
       })
-      var keytest = Entity.create([keyboardControls.name, echoKeys.name], { 
+      var keytest = Entity.create({ 
+        components: [keyboardControls.name, echoKeys.name],   
         id: 'keytest'
       });
       keytest.init();
@@ -60,6 +61,25 @@
 <body>
 
   <h1>Keyboard Controls</h1>
+  <p>Test that the keyboard controls are working: </p>
+  <ul>
+    <li>
+      <h4>With focus on the document, press an arrow key.</h4>
+      <p>Expected Result: </p>
+      <ul>
+        <li>You should see the direction name (e.g. UP) in the first text box</li>
+        <li>You should see a bitmask direction in degrees (where 0 is up) in the 2nd text box</li>
+      </ul>
+    </li>
+    <li>
+      <h4>With focus on the document, press both the up arrow key and the left arrow key.</h4>
+      <p>Expected Result: </p>
+      <ul>
+        <li>You should see the direction names (e.g. UP,LEFT) in the first text box</li>
+        <li>You should see the direction in degrees (where 0 is up) in the 2nd text box, in this case </li>
+      </ul>
+    </li>
+  </ul>
   <p><input type="text" id="keysdown" readonly></p>
   <p><input type="text" id="keymask" readonly></p>
   <p><button onclick="clearInterval(itv)">stop</button></p>
