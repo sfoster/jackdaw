@@ -140,7 +140,7 @@ define(['entity', 'component'], function(Entity, Component){
     });
     
     it("should call all components with the instance", function(){
-      var ent = new Entity("c1, c2");
+      var ent = new Entity({ components: ["c1", "c2"] });
       ent.init();
       expect(ent.c1_init).toBeTruthy();
       expect(ent.c2_init).toBeTruthy();
@@ -173,7 +173,7 @@ define(['entity', 'component'], function(Entity, Component){
     });
     
     it("should call attached component methods", function(){
-      var ent = new Entity("c1, c2");
+      var ent = new Entity({ components: ["c1", "c2"] });
       ent.init();
       expect(ent.count).toBe(0);
       expect(ent.description).toBe("Some words");
