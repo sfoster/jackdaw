@@ -25,14 +25,21 @@
       'dom',
       'sprite',
       'entity',
+      'canvasRenderer',
       'amd/image!../resources/charsets.png',
+      'amd/image!../resources/grass.jpg',
       'domReady!'
-    ], function(lang, dom, Sprite, Entity, spriteSheet){
+    ], function(lang, dom, Sprite, Entity, renderer, spriteSheet, grassImg){
 
-      var canvas = document.getElementById('stage'),
-          ctx = canvas.getContext("2d");
-
-      console.log("require callback: ", ctx);
+      var canvasNode = document.getElementById('stage');
+      renderer.setCanvas( canvasNode );
+      
+      var bg = new Entity({
+        components: [],
+        img: grassImg,
+        name: 'bg',             // the name of this entity
+        x: 0, y: 0, width: canvasNode.width, height: canvasNode.height    // initial position/dimensions
+      });
       
       // define some properties that all the states will share
       var commonState = { img: spriteSheet, width: 16, height: 18, offsetx: 0, frames: 3, interval: 120 };
@@ -66,7 +73,7 @@
         x: 10, y: 50, width: 32, height: 36,    // initial position/dimensions
         
         // render will get called after every update
-        render: function(ctx){
+        ___render: function(ctx){
           // normally the entity's render wouldn't clear the canvas, this is just for this test/demo
           ctx.clearRect( 0, 0, canvas.width, canvas.height );
 
@@ -95,36 +102,43 @@
       
       ent.init();
       ent.update();
-      ent.render(ctx);
+      
+      var scene = {
+        getRenderList: function(){
+          return [bg, ent];
+        }
+      }
+      renderer.render( [bg, ent] );
+      // ent.render(ctx);
 
       window.moveUp = function(){
         player.spriteState = 'walkup';
         player.y -= 2;
         player.update();
-        player.render(ctx);
+        renderer.render( scene.getRenderList() );
       };
       window.moveDown = function(){
         player.spriteState = 'walkdown';
         player.y += 2;
         player.update();
-        player.render(ctx);
+        renderer.render( scene.getRenderList() );
       };
       window.moveRight = function(){
         player.spriteState = 'walkright';
         player.x += 2;
         player.update();
-        player.render(ctx);
+        renderer.render( scene.getRenderList() );
       };
       window.moveLeft = function(){
         player.spriteState = 'walkleft';
         player.x -= 2;
         player.update();
-        player.render(ctx);
+        renderer.render( scene.getRenderList() );
       };
       window.stopMoving = function(){
         player.spriteState = 'standing';
         player.update();
-        player.render(ctx);
+        renderer.render( scene.getRenderList() );
       };
       
       var sequence = ['moveRight', 'moveDown', 'moveLeft', 'moveUp', 'stopMoving'], 
@@ -133,7 +147,7 @@
           stepTime = lastTick;
       function tick(){
         var now = +new Date();
-        if(now - stepTime >= 2000) {
+        if(now - stepTime >= 4500) {
           pointer = (pointer >= sequence.length-1) ? 0 : pointer+1;
           stepTime = now;
         }
