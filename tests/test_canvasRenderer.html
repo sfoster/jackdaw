@@ -30,7 +30,13 @@
       'domReady!'
     ], function(lang, dom, Sprite, Entity, renderer, spriteSheet){
 
-
+      function createFrom(source, props){
+        var obj = Object.create(source);
+        for(var i in props || {}){
+          obj[i] = props[i];
+        }
+        return obj;
+      }
       function degreesToRadians(degrees) {
         return degrees * (Math.PI/180);
       }
@@ -64,46 +70,59 @@
       var scene = {
         opaqueBox: {
           x: center.x - 50, y: center.y - 50, width: 100, height: 100,
-          fill: true, // should be some value?
-          color: { b: 102 },
+          shape: 'rect', // should be some value?
+          color: { r: 0, g: 0, b: 51 },
           oclock: 0
         },
         translucentBox: {
-          x: center.x - 25, y: center.y - 25, width: 50, height: 50,
-          fill: true, // should be some value?
+          x: center.x - 25, y: center.y - 25, width: 200, height: 300,
+          shape: 'rect', // should be some value?
           color: { r: 255, g: 255, b: 51, a: 0.5 }
         },
         boxes: [],
         getRenderList: function(){
-         return [ this.opaqueBox ].concat(this.boxes);
+          var list = [].concat(this.boxes);
+          list.sort(function(a, b){
+            return a.width * a.height < b.width * b.height;
+          });
+          list.unshift(this.opaqueBox);
+          list.push.apply(list, this.labels);
+          return list;
         }
       };
 
       // generate some boxes
-      scene.boxes = ("abcdefghijklmn").split('').map(function(name){
-        var box = Object.create( scene.translucentBox );
-        lang.mixin( box, {
+      var labels = scene.labels = [];
+      scene.boxes = ("abcdefghijklmnopqrstuvwxyz").split('').map(function(name){
+        var proto = scene.translucentBox; 
+        var box = createFrom( proto, {
           name: 'box_'+name,
-          y: center.y - Math.floor(Math.random() * (center.y - box.height/2)),
+          width: Math.random() * proto.width,
+          height: Math.random() * proto.height,
           degrees: 90,
           color: {
             r: Math.random() * 255,
             g: Math.random() * 255,
             b: Math.random() * 255,
-            a: Math.random()
+            a: 0.5
           },
-          label: name,
-          radius: Math.sqrt( Math.pow( center.x-box.x , 2) + Math.pow( center.y-box.y , 2) )
+          type: 'rect',
+          radius: Math.random() * Math.sqrt( Math.pow( center.x-proto.x , 2) + Math.pow( center.y-proto.y , 2) )
         });
+        var label = createFrom( box, { name: 'label_'+name, text: name, color: '#000', x: box.x+1, y: box.y+1 });
+        label.shape = null;
+        label.type = 'text';
+        labels.push( label );
         return box;
       });
 
       window.itv = setInterval(function(){
         var box, 
-            radius = 0;
-        for(var i=0; i<scene.boxes.length; i++){
-          box = scene.boxes[i];
-          moveAroundPt( scene.boxes[i], center, scene.boxes[i].radius );
+            radius = 0, 
+            moveables = [].concat(scene.boxes, scene.labels);
+        for(var i=0; i<moveables.length; i++){
+          box = moveables[i];
+          moveAroundPt( moveables[i], center, moveables[i].radius );
         }
         try {
           renderer.render( scene.getRenderList() );
