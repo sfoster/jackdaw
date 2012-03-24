@@ -1,0 +1,44 @@
+{
+    "resources": {
+    },
+    "commonState": {
+        "frames": 1, 
+        "height": 50, 
+        "img": "tests/resources/icon.png", 
+        "interval": 16.66, 
+        "offsetx": 0, 
+        "offsety": 0, 
+        "width": 50
+    }, 
+    "entities": [
+        {
+            "color": {
+                "b": 0, 
+                "g": 0, 
+                "r": 200
+            }, 
+            "components": [
+                "ricochet", "skullface"
+            ], 
+            "destination": "level_003", 
+            "height": 40, 
+            "name": "example-monster", 
+            "width": 5, 
+            "x": 500, 
+            "y": 300
+        }
+    ], 
+    "sprites": [
+        {
+            "name": "skullface", 
+            "state": {
+                "move": {
+                    "$delegate": {
+                        "$ref": "$.commonState"
+                    }, 
+                    "name": "move"
+                }
+            }
+        }
+    ]
+}
