@@ -8,7 +8,7 @@
     curl = {
       apiName: 'require',
       baseUrl: '../lib',
-      pluginPath: '../lib',
+      pluginPath: '../lib/amd',
       paths: {
         curl: 'curl/src/curl',
         dollar: 'vendor/jquery-1.7',
@@ -20,18 +20,36 @@
   <script src="../lib/curl/src/curl.js"></script>
   <script>
 require([
-  '../lib/entity',
-  '../tests/entityLoader'
-], function(Entity, entityLoader){
-  var levelPath = '../tests/resources/level';
-  require(['level!' + levelPath], function (levelData) {
-    console.log("entities length = " + levelData.entities.length);
-  });
+  'dollar',
+  'level!levels/example.json'
+], function($, level){
+  
+  function init(){
+    var renderList = level.getRenderList();
+    console.log("init, getRenderList: ", renderList);
+    renderList.forEach(function(ent){
+      $('#output').append('<li>'+ent.name+'<pre>'+ent.toJSON(true)+'</pre></li>');
+    });
+  }
+  if(level.resourceLoader.pendingCount){
+    level.resourceLoader.listen('load', function(evt){
+      console.log("loader loaded: ", evt.id, evt);
+      if(evt.pending <= 0){
+        init();
+      }
+    });
+  } else {
+    init();
+  }
+  level.getRenderList = function(){
+    return this.entities;
+  }
 });
   </script>
 </head>
 
 <body>
   <h1>Level Loader</h1>
+  <ol id="output"></pl>
 </body>
 </html>
