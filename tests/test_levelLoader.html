@@ -21,8 +21,9 @@
   <script>
 require([
   'dollar',
+  'Promise',
   'level!levels/example.json'
-], function($, level){
+], function($, Promise, level){
   
   function init(){
     var renderList = level.getRenderList();
@@ -31,16 +32,10 @@ require([
       $('#output').append('<li>'+ent.name+'<pre>'+ent.toJSON(true)+'</pre></li>');
     });
   }
-  if(level.resourceLoader.pendingCount){
-    level.resourceLoader.listen('load', function(evt){
-      console.log("loader loaded: ", evt.id, evt);
-      if(evt.pending <= 0){
-        init();
-      }
-    });
-  } else {
+  Promise.when(level.ready(), function(level){
     init();
-  }
+  });
+  
   level.getRenderList = function(){
     return this.entities;
   }
