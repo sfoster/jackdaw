@@ -30,30 +30,29 @@ require([
 ], function(lang, $, Promise, renderer, engine){
   
   // Game setup: 
-  game = new engine.Engine({  });
+  game = new engine.Engine();
   
   // hook the lifecyle events
   game.listen("startup", function(){
-    renderer.canvasNode = game.config.canvasNode;
+    renderer.setCanvas(game.config.canvasNode);
     renderer.init();
+    game.loop.start();
 
-    setTimeout(function(){
-      game.loop.stop();
-    }, 100);
-    
   });
   game.listen("update", function(arg){
     var level = game.currentLevel;
-    level.entities.forEach(function(ent){
-      ent.update && ent.update();
-    });
+    if(level){
+      level.entities.forEach(function(ent){
+        ent.update && ent.update();
+      });
+    }
   });
   game.listen("render", function(){
     renderer.render( game.currentLevel.getRenderList() );
   });
-  game.listen("level.enter", function(){
-    renderer.setCanvas(game.config.canvasNode);
-    game.loop.start();
+  game.listen("level.enter", function(evt){
+    game.currentLevel = evt.target;
+    console.log("level enter", evt);
   });
   // when a level is completed go to the next level
   game.listen('level.complete',  function(){
@@ -67,20 +66,25 @@ require([
   require(['level!levels/example.json'],function(level){
     // shim this renderList method in, as level has no prototype yet
     console.log("level:", level);
+    var stageNode = document.getElementById('stage');
+    
+    level.bounds = { l: 0, t: 0, r: stageNode.width, b: stageNode.height };
+    
     level.getRenderList = function(){
       return this.entities;
     };
 
-    // game.start({ canvasNode: document.getElementById('stage') }).then(function(){
-    //   game.emit('log', "and we're off...");
-    // });
-    
     Promise.when(level.ready(), function(level){
-      level.init();
-      game.currentLevel = level;
-      game.emit("level.enter", [{
-        target: level
-      }]);
+      game.start({ canvasNode: stageNode }).then(function(){
+        game.emit('log', "and we're off...");
+
+        level.init();
+        game.currentLevel = level;
+        game.emit("level.enter", {
+          target: level
+        });
+      });
+      game.emit('loaded');
     });
     
   });
