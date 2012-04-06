@@ -4,7 +4,7 @@
     "commonState": {
         "frames": 1, 
         "height": 50, 
-        "img": "/tests/resources/icon.png", 
+        "img": "/tests/resources/icon.png!bust", 
         "interval": 16.66, 
         "offsetx": 0, 
         "offsety": 0, 

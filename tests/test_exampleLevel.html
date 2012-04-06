@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Test Level Loader</title>
+  <script>
+  // configure curl
+    curl = {
+      apiName: 'require',
+      baseUrl: '../lib',
+      pluginPath: '../lib/amd',
+      paths: {
+        curl: 'curl/src/curl',
+        dollar: 'vendor/jquery-1.7',
+        tests: '../tests',
+        image: 'amd/vendor/image',
+        domReady: 'curl/src/curl/plugin/domReady'
+      }
+    };
+  </script>
+  <script src="../lib/curl/src/curl.js"></script>
+  <script>
+
+require([
+  'lang', 
+  'dollar',
+  'Promise',
+  'canvasRenderer',
+  'engine/core'
+], function(lang, $, Promise, renderer, engine){
+  
+  // Game setup: 
+  game = new engine.Engine({  });
+  
+  // hook the lifecyle events
+  game.listen("startup", function(){
+    renderer.canvasNode = game.config.canvasNode;
+    renderer.init();
+
+    setTimeout(function(){
+      game.loop.stop();
+    }, 100);
+    
+  });
+  game.listen("update", function(arg){
+    var level = game.currentLevel;
+    level.entities.forEach(function(ent){
+      ent.update && ent.update();
+    });
+  });
+  game.listen("render", function(){
+    renderer.render( game.currentLevel.getRenderList() );
+  });
+  game.listen("level.enter", function(){
+    renderer.setCanvas(game.config.canvasNode);
+    game.loop.start();
+  });
+  // when a level is completed go to the next level
+  game.listen('level.complete',  function(){
+    game.loop.stop();
+    // ...
+  });
+  game.listen("level.exit", function(){
+    game.loop.stop();
+  });
+
+  require(['level!levels/example.json'],function(level){
+    // shim this renderList method in, as level has no prototype yet
+    console.log("level:", level);
+    level.getRenderList = function(){
+      return this.entities;
+    };
+
+    // game.start({ canvasNode: document.getElementById('stage') }).then(function(){
+    //   game.emit('log', "and we're off...");
+    // });
+    
+    Promise.when(level.ready(), function(level){
+      level.init();
+      game.currentLevel = level;
+      game.emit("level.enter", [{
+        target: level
+      }]);
+    });
+    
+  });
+  
+});
+  </script>
+</head>
+
+<body>
+  <h1>Level Loader</h1>
+  <canvas id="stage" width="800" height="400"></canvas>
+  <ol id="output"></pl>
+</body>
+</html>
