@@ -20,7 +20,6 @@
             "components": [
                 "ricochet", "skullface"
             ], 
-            "destination": "level_003", 
             "height": 40, 
             "name": "example-monster", 
             "width": 5, 
