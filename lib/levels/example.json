@@ -3,12 +3,12 @@
     },
     "commonState": {
         "frames": 1, 
-        "height": 50, 
+        "height": 400, 
+        "width": 400,
         "img": "/tests/resources/icon.png!bust", 
         "interval": 16.66, 
         "offsetx": 0, 
-        "offsety": 0, 
-        "width": 50
+        "offsety": 0
     }, 
     "entities": [
         {
@@ -22,7 +22,7 @@
             ], 
             "height": 40, 
             "name": "example-monster", 
-            "width": 5, 
+            "width": 40, 
             "x": 500, 
             "y": 300
         }
