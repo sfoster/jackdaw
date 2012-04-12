@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Test Physics</title>
+  <script>
+  // configure curl
+    curl = {
+      apiName: 'require',
+      baseUrl: '../lib',
+      pluginPath: '../lib',
+      paths: {
+        curl: 'curl/src/curl',
+        'dollar': 'vendor/jquery-1.7',
+        tests: '../tests',
+        physics: 'vendor/microphysics'
+      }
+    }
+  </script>
+  <script src="../lib/curl/src/curl.js"></script>
+  <script>
+    var now = +new Date;
+    require([
+      'physics',
+      'components/keyboardControls',
+      'canvasRenderer',
+      'component',
+      'entity'
+    ], function(phys, keyboard, renderer, Component, Entity){
+      
+      var world;
+      var physics = new Component({ 
+        name: 'physics',
+        init: function(){
+          world = this.world = new phys.World();
+          world.start(Date.now()/1000);
+
+          // add gravity to our world
+          var gravity = new phys.LinearAccelerator({
+              x   :  0,
+              y   : -9.8,
+              z   :  0
+          });
+          world.add(gravity);
+        },
+        attach: function(ent){
+          // when a component is a attached to an entity, 
+          //  it decorates it with any necessary properties
+          //  and sets up any necessary bindings
+          var bodyType = ent.physicsType || "AABB";
+          console.log("creating physics body for entity:", bodyType, ent)
+          var args = {};
+          
+          // prepare args for the new physics body from the entity's values
+          ['width', 'height', 'x', 'y', 'z', 'radius', 'restitution'].forEach(function(p){
+            if(p in ent) args[p] = ent[p];
+          });
+          console.log("physics body args: ", args);
+
+          // the entity and the thing-with-physics are *not* the same thing here
+          // the physics body is stored as a property on the entity
+          ent.physicsBody = new phys[bodyType](args);
+          // add this to our physical world
+          world.add(ent.physicsBody);
+          console.log("physics body for " + ent.id+ " added to world");
+        },
+        detach: function(ent){
+          // when a component is a detached from an entity, 
+          //  it removes any properties it owns
+          //  and tears down any bindings and other stuff it created
+          world.remove(ent.physicsBody);
+          ent.physicsBody = null;
+          delete ent.physicsBody;
+        },
+        update: function(ent){
+          var timestep = 1/180;
+          world.step(timestep, Date.now());
+          // copy adjusted values back into entity itself
+          var xyz = ent.physicsBody.getPosition();
+          console.log("new position: ", xyz);
+          ent.x = xyz[0];
+          ent.y = xyz[1];
+          ent.z = xyz[2];
+        }
+      });
+      
+      console.log("physics engine: ", phys);
+      window.microphysics = vphy = phys;
+      
+      renderer.setCanvas( document.getElementById('stage') );
+      var center = {
+        x: renderer.canvasNode.width/2,
+        y: renderer.canvasNode.height/2
+      };
+
+      // init physics component
+      physics.init();
+
+      var stopAt = Date.now() + 1000;
+
+      // create an entity with the physics component
+      var floor = Entity.create({
+        components: ['physics'],
+        x: center.x - 50, 
+        y: renderer.canvasNode.height-2, 
+        width: 100, height: 2,
+        shape: 'rect',
+        color: { r: 204, g: 0, b: 0 }
+      }).init();
+      console.log("floor init'd: ", floor, typeof floor.update);
+      
+      // create an entity with the physics component
+      var box = Entity.create({
+        components: ['physics', 'keyboardControls'],
+        x: center.x - 50, 
+        y: 0, 
+        width: 20, height: 20,
+        shape: 'rect',
+        color: { r: 0, g: 0, b: 0 }
+      }).init();
+      
+      // apply some acceleration to this entity.. move damn it
+      box.physicsBody.accelerate(1,1,0);
+      
+      var itv = setInterval(function(){
+        if(Date.now() >= stopAt) {
+          console.log("stopping timer");
+          clearInterval(itv);
+        } else {
+          // console.log("calling update on entity: ", floor, typeof floor.update);
+          floor.update(); // calls update on all its components
+          // render the result
+          renderer.render([
+            floor,
+            box
+          ]);
+        }
+      }, 1000/30);
+
+      // add some keyboard controls too
+      world.add({
+          type: phys.types.ACCELERATOR,   // let the lib know it is an accelerator
+          perform: function(bodies){      // bodies is the array of all vphy.Body
+              if( keyboard.pressed('right') ) box.physicsBody.accelerate(1,0,0);
+              if( keyboard.pressed('left') )  box.physicsBody.accelerate(-1,0,0);
+              if( keyboard.pressed('up') )    box.physicsBody.accelerate(0,0,1);
+              if( keyboard.pressed('down') )  box.physicsBody.accelerate(0,0,-1);
+          }
+      });
+
+    }); 
+  </script>
+</head>
+
+<body>
+
+  <canvas id="stage" width="800" height="400"></canvas>
+</body>
+</html>
