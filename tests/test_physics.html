@@ -38,7 +38,7 @@
           // add gravity to our world (how/when does this come into play?)
           var gravity = new phys.LinearAccelerator({
               x   :  0,
-              y   : -9.8,
+              y   :  -9.8,
               z   :  0
           });
           world.add(gravity);
@@ -52,7 +52,7 @@
           var args = {};
           
           // prepare args for the new physics body from the entity's values
-          ['width', 'height', 'x', 'y', 'z', 'radius', 'restitution'].forEach(function(p){
+          ['width', 'height', 'x', 'y', 'z', 'radius', 'restitution', 'dynamic', 'mass'].forEach(function(p){
             if(p in ent) args[p] = ent[p];
           });
           console.log("physics body args: ", args);
@@ -71,7 +71,7 @@
                 // I want this entity to fall to the ground if there are no other forces acting on it
                 // But although perform is being called repeatedly here, the xyz values don't change?
 
-                console.log("perform on\t"+ent.id, body.y, body.y, body.y);
+                // console.log("perform on\t"+ent.id, body.y, body.y, body.y);
                 body.accelerate(0, 3, 0);
               }
           });
@@ -86,14 +86,11 @@
           delete ent.physicsBody;
         },
         update: function(ent){
-          var timestep = 1/180;
-          world.step(timestep, Date.now());
-          
           // copy adjusted values back into entity itself
           var xyz = ent.physicsBody.getPosition();
 
           // spam the console!!
-          console.log("new position: ", xyz);
+          // console.log("new position: ", xyz);
           ent.x = xyz[0];
           ent.y = xyz[1];
           ent.z = xyz[2];
@@ -117,8 +114,10 @@
       // create an entity with the physics component
       var floor = Entity.create({
         components: ['physics'],
+        // dynamic: false,
+        // mass: 100,
         x: center.x - 50, 
-        y: renderer.canvasNode.height-2, 
+        y: renderer.canvasNode.height-100, 
         width: 100, height: 2,
         shape: 'rect',
         color: { r: 204, g: 0, b: 0 }
@@ -128,9 +127,13 @@
       // create an entity with the physics component
       var box = Entity.create({
         components: ['physics', 'keyboardControls'],
+        physicsType: 'Sphere',
+        // mass: 2,
         x: center.x - 50, 
         y: 0, 
         width: 20, height: 20,
+        restitution : 0.6,
+        radius: 10,
         shape: 'rect',
         color: { r: 0, g: 0, b: 0 }
       }).init();
@@ -138,11 +141,14 @@
       // apply some acceleration to this entity.. move damn it
       box.physicsBody.accelerate(1,1,0);
       
+      var timestep = 1/180;
       var itv = setInterval(function(){
         if(Date.now() >= stopAt) {
           console.log("stopping timer");
           clearInterval(itv);
         } else {
+          var timestep = 1/180;
+          world.step(timestep, Date.now()/1000);
           // console.log("calling update on entity: ", floor, typeof floor.update);
           floor.update(); // calls update on all its components
           // render the result
