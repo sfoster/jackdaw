@@ -15,7 +15,7 @@
         tests: '../tests',
         physics: 'vendor/microphysics'
       }
-    }
+    };
   </script>
   <script src="../lib/curl/src/curl.js"></script>
   <script>
@@ -35,7 +35,7 @@
           world = this.world = new phys.World();
           world.start(Date.now()/1000);
 
-          // add gravity to our world
+          // add gravity to our world (how/when does this come into play?)
           var gravity = new phys.LinearAccelerator({
               x   :  0,
               y   : -9.8,
@@ -48,7 +48,7 @@
           //  it decorates it with any necessary properties
           //  and sets up any necessary bindings
           var bodyType = ent.physicsType || "AABB";
-          console.log("creating physics body for entity:", bodyType, ent)
+          console.log("creating physics body for entity:", bodyType, ent);
           var args = {};
           
           // prepare args for the new physics body from the entity's values
@@ -59,9 +59,22 @@
 
           // the entity and the thing-with-physics are *not* the same thing here
           // the physics body is stored as a property on the entity
-          ent.physicsBody = new phys[bodyType](args);
+          var body = ent.physicsBody = new phys[bodyType](args);
+          
           // add this to our physical world
           world.add(ent.physicsBody);
+
+          // Adding an accelerator for body.. do we need one per moving thing? 
+          world.add({
+              type: vphy.types.ACCELERATOR,
+              perform: function () {
+                // I want this entity to fall to the ground if there are no other forces acting on it
+                // But although perform is being called repeatedly here, the xyz values don't change?
+
+                console.log("perform on\t"+ent.id, body.y, body.y, body.y);
+                body.accelerate(0, 3, 0);
+              }
+          });
           console.log("physics body for " + ent.id+ " added to world");
         },
         detach: function(ent){
@@ -75,8 +88,11 @@
         update: function(ent){
           var timestep = 1/180;
           world.step(timestep, Date.now());
+          
           // copy adjusted values back into entity itself
           var xyz = ent.physicsBody.getPosition();
+
+          // spam the console!!
           console.log("new position: ", xyz);
           ent.x = xyz[0];
           ent.y = xyz[1];
